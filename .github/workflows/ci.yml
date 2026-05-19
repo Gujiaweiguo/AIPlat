@@ -35,7 +35,6 @@ jobs:
               - 'VERSION'
             frontend:
               - 'web/default/**'
-              - 'web/classic/**'
 
   go-check:
     name: Go Vet & Test
@@ -44,12 +43,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Create placeholder dist dirs for go:embed
-        run: |
-          mkdir -p web/default/dist web/classic/dist
-          echo '<!doctype html><html><head><title>ci</title></head><body>placeholder</body></html>' > web/default/dist/index.html
-          echo '<!doctype html><html><head><title>ci</title></head><body>placeholder</body></html>' > web/classic/dist/index.html
 
       - uses: actions/setup-go@v5
         with:
@@ -113,14 +106,6 @@ jobs:
         working-directory: web/default
         env:
           DISABLE_ESLINT_PLUGIN: 'true'
-          VITE_REACT_APP_VERSION: ${{ steps.version.outputs.VERSION }}
-        run: |
-          bun install
-          bun run build
-
-      - name: Build classic frontend
-        working-directory: web/classic
-        env:
           VITE_REACT_APP_VERSION: ${{ steps.version.outputs.VERSION }}
         run: |
           bun install

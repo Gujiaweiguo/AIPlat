@@ -18,7 +18,6 @@ Check all that apply based on the files actually changed:
 - [ ] API/auth/routing changes (router/, controller/, middleware/)
 - [ ] Database/model changes (model/, migration, SQL)
 - [ ] Frontend UI (default) changes (web/default/src/)
-- [ ] Frontend UI (classic) changes (web/classic/src/)
 - [ ] Relay/provider adapter changes (relay/channel/*)
 - [ ] Release/packaging changes (Dockerfile, docker-compose*, release config)
 
@@ -33,20 +32,18 @@ These MUST all pass. Any FAIL blocks verify/archive.
 | 3 | Frontend lint (default) | `cd web/default && bun run lint` | PASS/FAIL/SKIP | (output or skip reason) |
 | 4 | Frontend typecheck (default) | `cd web/default && bun run typecheck` | PASS/FAIL/SKIP | (output or skip reason) |
 | 5 | Frontend build (default) | `cd web/default && bun run build` | PASS/FAIL/SKIP | (output or skip reason) |
-| 6 | Classic build | `cd web/classic && bun run build` | PASS/FAIL/SKIP | (output or skip reason) |
 
 ### Hard Gate Rules by Change Type
 
-| Change Type | Go vet | Go test | FE lint | FE typecheck | FE build | Classic build |
-|-------------|--------|---------|---------|--------------|----------|---------------|
-| Documentation | SKIP | SKIP | SKIP | SKIP | SKIP | SKIP |
-| Internal logic | REQUIRED | REQUIRED | SKIP | SKIP | SKIP | SKIP |
-| API/auth/routing | REQUIRED | REQUIRED | SKIP | SKIP | REQUIRED | SKIP |
-| Database/model | REQUIRED | REQUIRED | SKIP | SKIP | SKIP | SKIP |
-| Frontend (default) | SKIP | SKIP | REQUIRED | REQUIRED | REQUIRED | SKIP |
-| Frontend (classic) | SKIP | SKIP | SKIP | SKIP | SKIP | REQUIRED |
-| Relay/provider | REQUIRED | REQUIRED | SKIP | SKIP | SKIP | SKIP |
-| Release/packaging | REQUIRED | REQUIRED | REQUIRED | REQUIRED | REQUIRED | REQUIRED |
+| Change Type | Go vet | Go test | FE lint | FE typecheck | FE build |
+|-------------|--------|---------|---------|--------------|----------|
+| Documentation | SKIP | SKIP | SKIP | SKIP | SKIP |
+| Internal logic | REQUIRED | REQUIRED | SKIP | SKIP | SKIP |
+| API/auth/routing | REQUIRED | REQUIRED | SKIP | SKIP | REQUIRED |
+| Database/model | REQUIRED | REQUIRED | SKIP | SKIP | SKIP |
+| Frontend (default) | SKIP | SKIP | REQUIRED | REQUIRED | REQUIRED |
+| Relay/provider | REQUIRED | REQUIRED | SKIP | SKIP | SKIP |
+| Release/packaging | REQUIRED | REQUIRED | REQUIRED | REQUIRED | REQUIRED |
 
 **Hard Gate Verdict**: PASS / FAIL
 
@@ -66,7 +63,7 @@ List any gates that were skipped and the reason:
 
 | # | Item | Reason |
 |---|------|--------|
-| 1 | (e.g., Classic build) | (e.g., No classic frontend changes) |
+| 1 | (e.g., FE build) | (e.g., No frontend changes) |
 
 ## Release Prerequisites
 

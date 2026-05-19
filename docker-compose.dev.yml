@@ -1,12 +1,11 @@
-# Frontend Development - Backend built from local source
+# Local development database for separated frontend/backend workflow
 #
 # Usage:
 #   1. docker compose -f docker-compose.dev.yml up -d
-#   2. cd web && bun install && bun run dev
-#   3. Open http://localhost:3001 (Rsbuild dev server, API auto-proxied to :3000)
-#
-# Rebuild backend after Go code changes:
-#   docker compose -f docker-compose.dev.yml up -d --build new-api
+#   2. Run PostgreSQL locally via Docker
+#   3. Start backend locally: go run main.go
+#   4. Start default frontend locally: cd web/default && bun install && bun run dev
+#   5. Optional legacy frontend: cd web/classic && bun install && bun run dev
 #
 # Stop:
 #   docker compose -f docker-compose.dev.yml down
@@ -15,40 +14,9 @@
 #   docker compose -f docker-compose.dev.yml down -v
 
 services:
-  new-api:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    image: new-api-dev:local
-    container_name: new-api-dev
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - dev_data:/data
-    environment:
-      - SQL_DSN=postgresql://root:123456@postgres:5432/new-api
-      - REDIS_CONN_STRING=redis://redis
-      - TZ=Asia/Shanghai
-      - BATCH_UPDATE_ENABLED=true
-    depends_on:
-      redis:
-        condition: service_started
-      postgres:
-        condition: service_healthy
-    networks:
-      - dev-network
-
-  redis:
-    image: redis:7-alpine
-    container_name: new-api-dev-redis
-    restart: unless-stopped
-    networks:
-      - dev-network
-
-  postgres:
+  aiplat-postgresql:
     image: postgres:15-alpine
-    container_name: new-api-dev-pg
+    container_name: aiplat-postgresql
     restart: unless-stopped
     environment:
       POSTGRES_USER: root
@@ -65,7 +33,6 @@ services:
       retries: 5
 
 volumes:
-  dev_data:
   dev_pg_data:
 
 networks:

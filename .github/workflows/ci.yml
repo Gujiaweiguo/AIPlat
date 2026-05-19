@@ -63,7 +63,7 @@ jobs:
         run: go test ./...
 
   frontend-check:
-    name: Frontend Lint & Build
+    name: Frontend Check
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
@@ -80,6 +80,9 @@ jobs:
 
       - name: Lint
         run: bun run lint
+
+      - name: Test
+        run: bun run test
 
       - name: Typecheck
         run: bun run typecheck

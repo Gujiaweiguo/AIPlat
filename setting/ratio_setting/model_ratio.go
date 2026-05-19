@@ -293,6 +293,14 @@ var defaultModelRatio = map[string]float64{
 	"BAAI/bge-large-en-v1.5":                   0,
 	"BAAI/bge-m3":                              0,
 	"netease-youdao/bce-embedding-base_v1":     0,
+	// SiliconFlow Qwen3 Embedding 模型
+	"Qwen/Qwen3-Embedding-8B":                  0,
+	"Qwen/Qwen3-Embedding-4B":                  0,
+	"Qwen/Qwen3-Embedding-0.6B":                0,
+	// SiliconFlow Qwen3 Reranker 模型
+	"Qwen/Qwen3-Reranker-8B":                   0,
+	"Qwen/Qwen3-Reranker-4B":                   0,
+	"Qwen/Qwen3-Reranker-0.6B":                 0,
 }
 
 var defaultModelPrice = map[string]float64{

@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useNavigate, getRouteApi } from '@tanstack/react-router'
 import { type Table } from '@tanstack/react-table'
@@ -68,12 +68,7 @@ export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
   const isAdmin = useIsAdmin()
   const fetchingLogs = useIsFetching({ queryKey: ['logs'] })
 
-  const [filters, setFilters] = useState<TaskLogsFilters>(() => {
-    const { start, end } = getDefaultTimeRange()
-    return { startTime: start, endTime: end }
-  })
-
-  useEffect(() => {
+  const initialFilters = useMemo((): TaskLogsFilters => {
     const { start, end } = getDefaultTimeRange()
     const baseFilters = {
       startTime: searchParams.startTime
@@ -84,18 +79,15 @@ export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
         ? { channel: String(searchParams.channel) }
         : {}),
     }
-    const next: TaskLogsFilters =
-      props.logCategory === 'drawing'
-        ? {
-            ...baseFilters,
-            ...(searchParams.filter ? { mjId: searchParams.filter } : {}),
-          }
-        : {
-            ...baseFilters,
-            ...(searchParams.filter ? { taskId: searchParams.filter } : {}),
-          }
-
-    setFilters(next)
+    return props.logCategory === 'drawing'
+      ? {
+          ...baseFilters,
+          ...(searchParams.filter ? { mjId: searchParams.filter } : {}),
+        }
+      : {
+          ...baseFilters,
+          ...(searchParams.filter ? { taskId: searchParams.filter } : {}),
+        }
   }, [
     props.logCategory,
     searchParams.startTime,
@@ -103,6 +95,7 @@ export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
     searchParams.channel,
     searchParams.filter,
   ])
+  const [filters, setFilters] = useState<TaskLogsFilters>(initialFilters)
 
   const handleChange = useCallback(
     (field: keyof TaskLogsFilters, value: Date | string | undefined) => {
@@ -165,6 +158,7 @@ export function TaskLogsFilterBar<TData>(props: TaskLogsFilterBarProps<TData>) {
 
   return (
     <DataTableToolbar
+      key={JSON.stringify({ filters: initialFilters, logCategory: props.logCategory })}
       table={props.table}
       customSearch={
         <CompactDateTimeRangePicker

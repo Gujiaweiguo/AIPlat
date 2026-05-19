@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useNavigate, getRouteApi } from '@tanstack/react-router'
 import { type Table } from '@tanstack/react-table'
@@ -71,33 +71,33 @@ export function CommonLogsFilterBar<TData>(
   const { sensitiveVisible, setSensitiveVisible } = useUsageLogsContext()
   const fetchingLogs = useIsFetching({ queryKey: ['logs'] })
 
-  const [filters, setFilters] = useState<CommonLogFilters>(() => {
+  const initialState = useMemo<{
+    filters: CommonLogFilters
+    logType: LogTypeValue | ''
+  }>(() => {
     const { start, end } = getDefaultTimeRange()
-    return { startTime: start, endTime: end }
-  })
-  const [logType, setLogType] = useState<LogTypeValue | ''>('')
-
-  useEffect(() => {
-    const next: Partial<CommonLogFilters> = {}
-    if (searchParams.startTime)
-      next.startTime = new Date(searchParams.startTime)
-    if (searchParams.endTime) next.endTime = new Date(searchParams.endTime)
-    if (searchParams.channel) next.channel = String(searchParams.channel)
-    if (searchParams.model) next.model = searchParams.model
-    if (searchParams.token) next.token = searchParams.token
-    if (searchParams.group) next.group = searchParams.group
-    if (searchParams.username) next.username = searchParams.username
-    if (searchParams.requestId) next.requestId = searchParams.requestId
-    if (searchParams.upstreamRequestId)
-      next.upstreamRequestId = searchParams.upstreamRequestId
-
-    if (Object.keys(next).length > 0) {
-      setFilters((prev) => ({ ...prev, ...next }))
+    const filters: CommonLogFilters = { startTime: start, endTime: end }
+    if (searchParams.startTime) {
+      filters.startTime = new Date(searchParams.startTime)
+    }
+    if (searchParams.endTime) filters.endTime = new Date(searchParams.endTime)
+    if (searchParams.channel) filters.channel = String(searchParams.channel)
+    if (searchParams.model) filters.model = searchParams.model
+    if (searchParams.token) filters.token = searchParams.token
+    if (searchParams.group) filters.group = searchParams.group
+    if (searchParams.username) filters.username = searchParams.username
+    if (searchParams.requestId) filters.requestId = searchParams.requestId
+    if (searchParams.upstreamRequestId) {
+      filters.upstreamRequestId = searchParams.upstreamRequestId
     }
 
     const typeArr = searchParams.type
-    if (Array.isArray(typeArr) && typeArr.length === 1) {
-      setLogType(typeArr[0])
+    return {
+      filters,
+      logType:
+        Array.isArray(typeArr) && typeArr.length === 1 && isLogTypeValue(typeArr[0])
+          ? typeArr[0]
+          : '',
     }
   }, [
     searchParams.startTime,
@@ -111,6 +111,8 @@ export function CommonLogsFilterBar<TData>(
     searchParams.upstreamRequestId,
     searchParams.type,
   ])
+  const [filters, setFilters] = useState<CommonLogFilters>(initialState.filters)
+  const [logType, setLogType] = useState<LogTypeValue | ''>(initialState.logType)
 
   const handleChange = useCallback(
     (field: keyof CommonLogFilters, value: Date | string | undefined) => {
@@ -199,6 +201,7 @@ export function CommonLogsFilterBar<TData>(
 
   return (
     <DataTableToolbar
+      key={JSON.stringify(initialState)}
       table={props.table}
       leftActions={statsBar}
       customSearch={

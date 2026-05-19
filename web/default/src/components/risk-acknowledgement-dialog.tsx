@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import {
@@ -82,22 +82,79 @@ export function RiskAcknowledgementDialog({
   onConfirm,
   className,
 }: RiskAcknowledgementDialogProps) {
+  const requiredTextInputCount = useMemo(
+    () => requiredTextParts.filter((part) => part.type === 'input').length,
+    [requiredTextParts]
+  )
+
+  return (
+    <RiskAcknowledgementDialogBody
+      key={`${open ? 'open' : 'closed'}-${checklist.length}-${requiredTextInputCount}`}
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      items={items}
+      checklist={checklist}
+      requiredText={requiredText}
+      requiredTextParts={requiredTextParts}
+      inputPrompt={inputPrompt}
+      inputPlaceholder={inputPlaceholder}
+      mismatchHint={mismatchHint}
+      confirmText={confirmText}
+      cancelText={cancelText}
+      destructive={destructive}
+      isLoading={isLoading}
+      onConfirm={onConfirm}
+      className={className}
+    />
+  )
+}
+
+function RiskAcknowledgementDialogBody({
+  open,
+  onOpenChange,
+  title,
+  description,
+  items = [],
+  checklist = [],
+  requiredText = '',
+  requiredTextParts = [],
+  inputPrompt,
+  inputPlaceholder,
+  mismatchHint,
+  confirmText,
+  cancelText,
+  destructive = true,
+  isLoading = false,
+  onConfirm,
+  className,
+}: RiskAcknowledgementDialogProps) {
   const { t } = useTranslation()
-  const [checkedItems, setCheckedItems] = useState<boolean[]>([])
+  const [checkedItems, setCheckedItems] = useState<boolean[]>(() =>
+    Array(checklist.length).fill(false)
+  )
   const [typedText, setTypedText] = useState('')
-  const [typedTextParts, setTypedTextParts] = useState<string[]>([])
+  const [typedTextParts, setTypedTextParts] = useState<string[]>(() =>
+    Array(requiredTextParts.filter((part) => part.type === 'input').length).fill(
+      ''
+    )
+  )
 
   const normalizedRequiredTextParts = useMemo<
     NormalizedRequiredTextPart[]
   >(() => {
-    let inputIndex = 0
-    return requiredTextParts.map((part) => {
-      if (part.type === 'input') {
-        const normalizedPart = { ...part, inputIndex }
-        inputIndex += 1
-        return normalizedPart
+    return requiredTextParts.map((part, index) => {
+      if (part.type === 'static') {
+        return part
       }
-      return part
+
+      return {
+        ...part,
+        inputIndex: requiredTextParts
+          .slice(0, index)
+          .filter((current) => current.type === 'input').length,
+      }
     })
   }, [requiredTextParts])
 
@@ -111,13 +168,6 @@ export function RiskAcknowledgementDialog({
   const requiredTextToDisplay = hasSegmentedRequiredText
     ? normalizedRequiredTextParts.map((part) => part.text).join('')
     : requiredText
-
-  useEffect(() => {
-    if (!open) return
-    setCheckedItems(Array(checklist.length).fill(false))
-    setTypedText('')
-    setTypedTextParts(Array(requiredTextInputCount).fill(''))
-  }, [open, checklist.length, requiredTextInputCount])
 
   const allChecked = useMemo(() => {
     if (checklist.length === 0) return true

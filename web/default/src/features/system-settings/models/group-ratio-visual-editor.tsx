@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useState, useMemo, useEffect, useCallback, memo } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import { Pencil, Plus, Trash2, GripVertical, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -109,8 +109,8 @@ function buildGroupPricingRows(
   })
   const names = new Set([...Object.keys(ratioMap), ...Object.keys(usableMap)])
 
-  return Array.from(names).map((name) => ({
-    _id: createGroupPricingId(),
+  return Array.from(names).map((name, index) => ({
+    _id: `gpr_${index}`,
     name,
     ratio: normalizeRatio(ratioMap[name]),
     selectable: Object.prototype.hasOwnProperty.call(usableMap, name),
@@ -135,33 +135,6 @@ function serializeGroupPricingRows(rows: GroupPricingRow[]) {
     GroupRatio: JSON.stringify(groupRatio, null, 2),
     UserUsableGroups: JSON.stringify(userUsableGroups, null, 2),
   }
-}
-
-function groupPricingSignature(rows: GroupPricingRow[]): string {
-  const serialized = serializeGroupPricingRows(rows)
-  return JSON.stringify({
-    groupRatio: safeJsonParse(serialized.GroupRatio, {
-      fallback: {},
-      silent: true,
-    }),
-    userUsableGroups: safeJsonParse(serialized.UserUsableGroups, {
-      fallback: {},
-      silent: true,
-    }),
-  })
-}
-
-function sourceGroupPricingSignature(
-  groupRatio: string,
-  userUsableGroups: string
-): string {
-  return JSON.stringify({
-    groupRatio: safeJsonParse(groupRatio, { fallback: {}, silent: true }),
-    userUsableGroups: safeJsonParse(userUsableGroups, {
-      fallback: {},
-      silent: true,
-    }),
-  })
 }
 
 export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
@@ -669,6 +642,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
 
       {/* Simple Group Dialog */}
       <SimpleGroupDialog
+        key={`${simpleDialogType ?? 'none'}-${simpleEditData?.name ?? 'new'}-${simpleDialogOpen ? 'open' : 'closed'}`}
         open={simpleDialogOpen}
         onOpenChange={setSimpleDialogOpen}
         onSave={handleSimpleSave}
@@ -740,6 +714,7 @@ export const GroupRatioVisualEditor = memo(function GroupRatioVisualEditor({
 
       {/* Group Override Dialog */}
       <GroupOverrideDialog
+        key={`${groupOverrideUserGroup ?? 'none'}-${groupOverrideEditData?.targetGroup ?? 'new'}-${groupOverrideDialogOpen ? 'open' : 'closed'}`}
         open={groupOverrideDialogOpen}
         onOpenChange={setGroupOverrideDialogOpen}
         onSave={handleOverrideSave}
@@ -762,26 +737,13 @@ function GroupPricingTable({
   onChange,
 }: GroupPricingTableProps) {
   const { t } = useTranslation()
-  const [rows, setRows] = useState<GroupPricingRow[]>(() =>
-    buildGroupPricingRows(groupRatio, userUsableGroups)
+  const rows = useMemo(
+    () => buildGroupPricingRows(groupRatio, userUsableGroups),
+    [groupRatio, userUsableGroups]
   )
-
-  useEffect(() => {
-    const incomingSignature = sourceGroupPricingSignature(
-      groupRatio,
-      userUsableGroups
-    )
-    setRows((currentRows) => {
-      if (groupPricingSignature(currentRows) === incomingSignature) {
-        return currentRows
-      }
-      return buildGroupPricingRows(groupRatio, userUsableGroups)
-    })
-  }, [groupRatio, userUsableGroups])
 
   const emitRows = useCallback(
     (nextRows: GroupPricingRow[]) => {
-      setRows(nextRows)
       const serialized = serializeGroupPricingRows(nextRows)
       onChange('GroupRatio', serialized.GroupRatio)
       onChange('UserUsableGroups', serialized.UserUsableGroups)
@@ -791,12 +753,14 @@ function GroupPricingTable({
 
   const updateRow = useCallback(
     (
-      id: string,
+      rowIndex: number,
       field: Exclude<keyof GroupPricingRow, '_id'>,
       value: string | number | boolean
     ) => {
       emitRows(
-        rows.map((row) => (row._id === id ? { ...row, [field]: value } : row))
+        rows.map((row, index) =>
+          index === rowIndex ? { ...row, [field]: value } : row
+        )
       )
     },
     [emitRows, rows]
@@ -823,8 +787,8 @@ function GroupPricingTable({
   }, [emitRows, rows])
 
   const removeRow = useCallback(
-    (id: string) => {
-      emitRows(rows.filter((row) => row._id !== id))
+    (rowIndex: number) => {
+      emitRows(rows.filter((_, index) => index !== rowIndex))
     },
     [emitRows, rows]
   )
@@ -887,13 +851,13 @@ function GroupPricingTable({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  rows.map((row) => (
+                  rows.map((row, index) => (
                     <TableRow key={row._id}>
                       <TableCell>
                         <Input
                           value={row.name}
                           onChange={(event) =>
-                            updateRow(row._id, 'name', event.target.value)
+                            updateRow(index, 'name', event.target.value)
                           }
                           aria-invalid={duplicateNames.includes(
                             row.name.trim()
@@ -908,7 +872,7 @@ function GroupPricingTable({
                           value={String(row.ratio)}
                           onChange={(event) =>
                             updateRow(
-                              row._id,
+                              index,
                               'ratio',
                               normalizeRatio(event.target.value)
                             )
@@ -920,7 +884,7 @@ function GroupPricingTable({
                           <Checkbox
                             checked={row.selectable}
                             onCheckedChange={(checked) =>
-                              updateRow(row._id, 'selectable', checked === true)
+                              updateRow(index, 'selectable', checked === true)
                             }
                             aria-label={t('User selectable')}
                           />
@@ -933,7 +897,7 @@ function GroupPricingTable({
                             placeholder={t('Group description')}
                             onChange={(event) =>
                               updateRow(
-                                row._id,
+                                index,
                                 'description',
                                 event.target.value
                               )
@@ -949,7 +913,7 @@ function GroupPricingTable({
                         <Button
                           variant='ghost'
                           size='sm'
-                          onClick={() => removeRow(row._id)}
+                          onClick={() => removeRow(index)}
                           aria-label={t('Delete')}
                         >
                           <Trash2 className='h-4 w-4' />
@@ -992,21 +956,10 @@ function SimpleGroupDialog({
   type,
 }: SimpleGroupDialogProps) {
   const { t } = useTranslation()
-  const [name, setName] = useState('')
-  const [value, setValue] = useState('')
+  const [name, setName] = useState(() => editData?.name ?? '')
+  const [value, setValue] = useState(() => editData?.value ?? '')
 
   const title = type === 'groupRatio' ? t('group ratio') : t('top-up ratio')
-
-  useEffect(() => {
-    if (!open) {
-      setName('')
-      setValue('')
-      return
-    }
-
-    setName(editData?.name ?? '')
-    setValue(editData?.value ?? '')
-  }, [editData, open])
 
   const handleSave = () => {
     if (!name.trim() || !value.trim()) return
@@ -1082,19 +1035,10 @@ function GroupOverrideDialog({
   userGroup,
 }: GroupOverrideDialogProps) {
   const { t } = useTranslation()
-  const [targetGroup, setTargetGroup] = useState('')
-  const [ratio, setRatio] = useState('')
-
-  useEffect(() => {
-    if (!open) {
-      setTargetGroup('')
-      setRatio('')
-      return
-    }
-
-    setTargetGroup(editData?.targetGroup ?? '')
-    setRatio(editData ? String(editData.ratio) : '')
-  }, [editData, open])
+  const [targetGroup, setTargetGroup] = useState(() => editData?.targetGroup ?? '')
+  const [ratio, setRatio] = useState(() =>
+    editData ? String(editData.ratio) : ''
+  )
 
   const handleSave = () => {
     if (!targetGroup.trim() || !ratio.trim()) return

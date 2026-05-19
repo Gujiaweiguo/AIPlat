@@ -1,42 +1,29 @@
-# Local development database for separated frontend/backend workflow
+# Local development environment for separated frontend/backend workflow
 #
-# Usage:
-#   1. docker compose -f docker-compose.dev.yml up -d
-#   2. Run PostgreSQL locally via Docker
-#   3. Start backend locally: go run main.go
-#   4. Start default frontend locally: cd web/default && bun install && bun run dev
-#   5. Optional legacy frontend: cd web/classic && bun install && bun run dev
+# This project shares a PostgreSQL instance with mysqlbot (sqlbot-postgresql-dev).
+# The "new-api" database is already created in that container.
 #
-# Stop:
-#   docker compose -f docker-compose.dev.yml down
+# Prerequisites:
+#   - sqlbot-postgresql-dev container must be running (mysqlbot's PostgreSQL)
+#   - The "new-api" database must exist in that PostgreSQL instance
 #
-# Reset data:
-#   docker compose -f docker-compose.dev.yml down -v
+# Quick Start:
+#   1. Ensure sqlbot-postgresql-dev is running
+#   2. Start backend locally:
+#        SQL_DSN="postgresql://sqlbot_user:DevOnly@123456@localhost:15432/new-api" go run main.go
+#   3. Start default frontend locally:
+#        cd web/default && bun install && bun run dev
+#   4. Optional legacy frontend:
+#        cd web/classic && bun install && bun run dev
+#
+# Create the database (only needed once):
+#   docker exec sqlbot-postgresql-dev psql -U sqlbot_user -d sqlbot -c 'CREATE DATABASE "new-api";'
+#
+# Reset setup state:
+#   docker exec sqlbot-postgresql-dev psql -U sqlbot_user -d "new-api" \
+#     -c 'DELETE FROM setups;' \
+#     -c 'DELETE FROM users WHERE role = 100;' \
+#     -c "DELETE FROM options WHERE key IN ('SelfUseModeEnabled', 'DemoSiteEnabled');"
 
-services:
-  aiplat-postgresql:
-    image: postgres:15-alpine
-    container_name: aiplat-postgresql
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: new-api
-    volumes:
-      - dev_pg_data:/var/lib/postgresql/data
-    networks:
-      - dev-network
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d new-api"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-volumes:
-  dev_pg_data:
-
-networks:
-  dev-network:
-    driver: bridge
+# No services defined — database is provided by sqlbot-postgresql-dev (mysqlbot's PostgreSQL).
+# This file is kept for documentation purposes and future dev infrastructure.

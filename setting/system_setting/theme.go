@@ -1,7 +1,8 @@
 package system_setting
 
 import (
-	"github.com/QuantumNous/new-api/common"
+	"strings"
+
 	"github.com/QuantumNous/new-api/setting/config"
 )
 
@@ -15,18 +16,26 @@ var themeSettings = ThemeSettings{
 
 func init() {
 	config.GlobalConfig.Register("theme", &themeSettings)
-	syncThemeToCommon()
-}
-
-func syncThemeToCommon() {
-	common.SetTheme(themeSettings.Frontend)
 }
 
 func GetThemeSettings() *ThemeSettings {
 	return &themeSettings
 }
 
-// UpdateAndSyncTheme syncs the theme config to common after DB load.
 func UpdateAndSyncTheme() {
-	syncThemeToCommon()
+}
+
+func ThemeAwarePath(suffix string) string {
+	if themeSettings.Frontend != "default" {
+		return suffix
+	}
+	switch {
+	case strings.HasPrefix(suffix, "/console/topup"):
+		return strings.Replace(suffix, "/console/topup", "/wallet", 1)
+	case strings.HasPrefix(suffix, "/console/log"):
+		return strings.Replace(suffix, "/console/log", "/usage-logs", 1)
+	case strings.HasPrefix(suffix, "/console/personal"):
+		return strings.Replace(suffix, "/console/personal", "/profile", 1)
+	}
+	return suffix
 }

@@ -1,0 +1,34 @@
+schema: spec-driven
+
+context: |
+  Tech stack:
+  - Backend: Go (Gin + GORM), supports SQLite/MySQL/PostgreSQL
+  - Frontend (default): React 19 + TypeScript + Rsbuild + TanStack Router/Query + Zustand + Tailwind
+  - Frontend (classic): React 18 + Vite + Semi Design
+  - Package manager: Bun
+  - Module path: github.com/QuantumNous/new-api
+  
+  Test gate commands (see openspec/templates/verification-report-template.md):
+  - Go: go vet ./..., go test ./...
+  - Frontend (default): bun run lint, bun run typecheck, bun run build
+  - Frontend (classic): bun run build
+  - Full stack: make check
+  
+  Conventions:
+  - JSON: use common.Marshal/common.Unmarshal, not encoding/json directly
+  - DB: must work on SQLite, MySQL >=5.7.8, PostgreSQL >=9.6
+  - Frontend i18n: all user-facing strings via t()
+  - Constants package: stdlib only, no project imports, no business logic
+
+rules:
+  proposal:
+    - Include a "Change Type Assessment" section listing which test gate categories apply
+    - Include a "Risk Assessment" section noting which hard gates are relevant
+  design:
+    - Reference existing patterns in relay/channel/* for provider work
+    - Reference existing patterns in service/* for business logic
+    - Note DB compatibility implications for any model changes
+  tasks:
+    - Break tasks into chunks executable in under 2 hours
+    - Each task should map to specific files/directories for gate type assessment
+    - After all tasks, add a "Verify" task: run verification report per template

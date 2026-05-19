@@ -8,7 +8,7 @@ DEV_POSTGRES_DB = new-api
 DEV_POSTGRES_USER = root
 DEV_SQLITE_PATH ?= one-api.db
 
-.PHONY: all build-frontend build-frontend-classic build-all-frontends start-backend dev dev-api dev-api-rebuild dev-web dev-web-classic reset-setup
+.PHONY: all build-frontend build-frontend-classic build-all-frontends start-backend dev dev-api dev-api-rebuild dev-web dev-web-classic reset-setup check check-backend check-frontend test
 
 all: build-all-frontends start-backend
 
@@ -67,3 +67,15 @@ reset-setup:
 		echo "Start the dev stack with 'make dev-api', or set SQLITE_PATH/DEV_SQLITE_PATH to your local SQLite database."; \
 		exit 1; \
 	fi
+
+check: check-backend check-frontend   ## 本地快速检查 (全栈)
+
+check-backend:                         ## Go 后端检查
+	go vet ./...
+	go test ./...
+
+check-frontend:                        ## 前端检查 (default)
+	cd $(FRONTEND_DIR) && bun run lint && bun run typecheck
+
+test:                                  ## 运行所有测试
+	go test ./...

@@ -207,6 +207,10 @@ var defaultModelRatio = map[string]float64{
 	"glm-4-long":                                0.001 * RMB,
 	"glm-4-flash":                               0,
 	"glm-4v-plus":                               0.01 * RMB,
+	"glm-4.6v-flash":                            0.15,
+	"glm-4.6v-flashx":                           0.15,
+	"glm-4.6":                                   0.3,
+	"glm-4.6v":                                  0.15,
 	"qwen-turbo":                                0.8572, // ￥0.012 / 1k tokens
 	"qwen-plus":                                 10,     // ￥0.14 / 1k tokens
 	"text-embedding-v1":                         0.05,   // ￥0.0007 / 1k tokens
@@ -270,10 +274,25 @@ var defaultModelRatio = map[string]float64{
 	"Qwen/Qwen3-235B-A22B-Instruct-2507":      0.3,
 	"zai-org/GLM-4.5-FP8":                     0.8,
 	"openai/gpt-oss-120b":                     0.5,
+	"deepseek-v4-flash":                       0.14 / 2,
 	"deepseek-ai/DeepSeek-R1-0528":            0.8,
 	"deepseek-ai/DeepSeek-R1":                 0.8,
 	"deepseek-ai/DeepSeek-V3-0324":            0.8,
 	"deepseek-ai/DeepSeek-V3.1":               0.8,
+	// SiliconFlow 免费模型
+	"Qwen/Qwen2.5-7B-Instruct":                 0,
+	"Qwen/Qwen2-7B-Instruct":                   0,
+	"Qwen/Qwen2-1.5B-Instruct":                 0,
+	"Qwen/Qwen1.5-7B-Chat":                     0,
+	"THUDM/glm-4-9b-chat":                      0,
+	"THUDM/chatglm3-6b":                        0,
+	"internlm/internlm2_5-7b-chat":             0,
+	"mistralai/Mistral-7B-Instruct-v0.2":       0,
+	// SiliconFlow 免费 Embedding 模型
+	"BAAI/bge-large-zh-v1.5":                   0,
+	"BAAI/bge-large-en-v1.5":                   0,
+	"BAAI/bge-m3":                              0,
+	"netease-youdao/bce-embedding-base_v1":     0,
 }
 
 var defaultModelPrice = map[string]float64{

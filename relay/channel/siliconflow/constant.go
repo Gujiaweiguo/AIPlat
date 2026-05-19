@@ -26,6 +26,7 @@ var ModelList = []string{
 	"deepseek-ai/DeepSeek-Coder-V2-Instruct",
 	"Qwen/Qwen2-1.5B-Instruct",
 	"internlm/internlm2_5-7b-chat",
+	"mistralai/Mistral-7B-Instruct-v0.2",
 	"BAAI/bge-large-en-v1.5",
 	"BAAI/bge-large-zh-v1.5",
 	"Pro/Qwen/Qwen2-7B-Instruct",
@@ -47,5 +48,11 @@ var ModelList = []string{
 	"Qwen/Qwen2-Math-72B-Instruct",
 	"netease-youdao/bce-reranker-base_v1",
 	"BAAI/bge-reranker-v2-m3",
+	"Qwen/Qwen3-Embedding-8B",
+	"Qwen/Qwen3-Embedding-4B",
+	"Qwen/Qwen3-Embedding-0.6B",
+	"Qwen/Qwen3-Reranker-8B",
+	"Qwen/Qwen3-Reranker-4B",
+	"Qwen/Qwen3-Reranker-0.6B",
 }
 var ChannelName = "siliconflow"

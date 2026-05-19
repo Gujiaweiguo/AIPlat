@@ -35,3 +35,9 @@ data/
 .test
 token_estimator_test.go
 skills-lock.json
+
+# Playwright MCP temp files
+.playwright-mcp/
+
+# Screenshots
+*.png

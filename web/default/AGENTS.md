@@ -155,6 +155,9 @@
 
 - 使用 Rsbuild，配置见 `rsbuild.config.ts`；脚本以 `package.json` 为准（如 `bun run dev`、`bun run build`、`bun run typecheck`、`bun run lint`、`bun run format`），包管理见 [3.15 依赖管理](#315-依赖管理)。
 - 代码分割与懒加载策略见 [3.4 性能](#34-性能)；资源使用合适格式与压缩，环境变量用 `.env` 且以 `VITE_` 前缀，不在代码中硬编码。
+- 默认生产产物为 `dist/` 静态站点，可独立于 Go 后端部署。容器化部署使用 `web/default/Dockerfile` 构建静态资源并交给 Nginx 托管：`docker build -t aiplat-frontend .`。
+- 独立部署时优先保持前端请求同源：前端容器内的 Nginx 负责将 `/api/`、`/v1/`、`/mj/`、`/pg/` 反向代理到后端；运行容器时通过 `BACKEND_URL` 指向后端服务地址（例如 `http://aiplat-app:3000` 或外部 API 域名）。
+- `VITE_API_BASE_URL` 仅用于构建时覆盖前端 API 基址；默认留空以继续走同源路径，由 Nginx 代理转发到后端。不要修改现有开发代理配置来适配生产环境。
 - **发布前**：执行 typecheck、lint、format 检查，完成生产构建并检查产物体积与环境变量配置。
 
 ---
@@ -173,3 +176,4 @@
 - **2026-01-28**：补充状态管理、API、表单、路由、错误处理、样式、文件组织、可访问性、安全、测试、依赖与构建部署规范。
 - **2026-01-29**：重组文档结构，合并重复内容，明确主次与交叉引用。
 - **2026-01-31**：在 3.2 中补充「类型检查」要求：改动 TS/TSX 后须执行 typecheck 并修复至无错。
+- **2026-05-19**：补充 `web/default` 独立部署说明，新增 Docker + Nginx 生产部署约定。

@@ -25,8 +25,8 @@ import { useAuthStore } from '@/stores/auth-store'
 // Axios Instance Configuration
 // ============================================================================
 
-// Base URL: empty string for same-origin API requests
-const baseURL = ''
+// Base URL: empty string for same-origin API requests, or explicit API origin when provided.
+const baseURL = import.meta.env.VITE_API_BASE_URL || ''
 
 // Create axios instance with default config
 export const api = axios.create({

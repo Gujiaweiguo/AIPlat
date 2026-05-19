@@ -33,25 +33,10 @@ jobs:
           cache: true
 
       - name: Go vet
-        run: go vet ./... 2>&1 | tee vet-output.txt || true
-        continue-on-error: true
+        run: go vet ./...
 
       - name: Go test
-        run: |
-          go test ./... 2>&1 | tee test-output.txt
-          # Check for real test failures (exclude known-failing packages)
-          # Known failures: relay/channel/claude (file content conversion), relay/helper (stream scanner)
-          if grep -q '^FAIL' test-output.txt; then
-            # Count total failures vs known failures
-            KNOWN="relay/channel/claude|relay/helper"
-            FAILING=$(grep '^FAIL\t' test-output.txt | grep -vE "($KNOWN)" || true)
-            if [ -n "$FAILING" ]; then
-              echo "Unexpected test failures found:"
-              echo "$FAILING"
-              exit 1
-            fi
-            echo "Only known-failing packages detected (relay/channel/claude, relay/helper). Passing CI."
-          fi
+        run: go test ./...
 
   frontend-check:
     name: Frontend Lint & Build

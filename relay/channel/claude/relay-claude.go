@@ -1,10 +1,13 @@
 package claude
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
@@ -30,6 +33,43 @@ const (
 	WebSearchMaxUsesMedium = 5
 	WebSearchMaxUsesHigh   = 10
 )
+
+func convertClaudeFileContent(file *dto.MessageFile) (*dto.ClaudeMediaMessage, error) {
+	if file == nil || file.FileData == "" {
+		return nil, nil
+	}
+
+	mediaType := mime.TypeByExtension(strings.ToLower(filepath.Ext(file.FileName)))
+	switch {
+	case mediaType == "application/pdf":
+		return &dto.ClaudeMediaMessage{
+			Type: "document",
+			Source: &dto.ClaudeMessageSource{
+				Type:      "base64",
+				MediaType: mediaType,
+				Data:      file.FileData,
+			},
+		}, nil
+	case strings.HasPrefix(mediaType, "text/"):
+		decoded, err := base64.StdEncoding.DecodeString(file.FileData)
+		if err != nil {
+			return nil, fmt.Errorf("decode text file data failed: %w", err)
+		}
+		text := string(decoded)
+		return &dto.ClaudeMediaMessage{Type: "text", Text: &text}, nil
+	case strings.HasPrefix(mediaType, "image/"):
+		return &dto.ClaudeMediaMessage{
+			Type: "image",
+			Source: &dto.ClaudeMessageSource{
+				Type:      "base64",
+				MediaType: mediaType,
+				Data:      file.FileData,
+			},
+		}, nil
+	default:
+		return nil, nil
+	}
+}
 
 func stopReasonClaude2OpenAI(reason string) string {
 	return reasonmap.ClaudeStopReasonToOpenAIFinishReason(reason)
@@ -375,6 +415,14 @@ func RequestOpenAI2ClaudeMessage(c *gin.Context, textRequest dto.GeneralOpenAIRe
 								Type: "text",
 								Text: common.GetPointer[string](mediaMessage.Text),
 							})
+						}
+					case dto.ContentTypeFile:
+						claudeFileMessage, err := convertClaudeFileContent(mediaMessage.GetFile())
+						if err != nil {
+							return nil, err
+						}
+						if claudeFileMessage != nil {
+							claudeMediaMessages = append(claudeMediaMessages, *claudeFileMessage)
 						}
 					default:
 						source := mediaMessage.ToFileSource()

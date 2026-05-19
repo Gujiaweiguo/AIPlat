@@ -2,17 +2,18 @@
 
 ## What this repo is
 
-- Go backend (`github.com/QuantumNous/new-api`) with two embedded frontends: `web/default` and `web/classic`.
+- Go backend (`github.com/QuantumNous/new-api`) focused on API, dashboard, relay, and video services.
 - Backend stack: Gin + GORM + SQLite/MySQL/PostgreSQL + Redis.
-- Default frontend: React 19 + TypeScript + Rsbuild + TanStack Router + React Query + Zustand + Tailwind.
-- Classic frontend: React 18 + Vite + Semi Design.
+- Default frontend: React 19 + TypeScript + Rsbuild + TanStack Router + React Query + Zustand + Tailwind; deployed independently from the backend.
+- Classic frontend: React 18 + Vite + Semi Design; legacy frontend kept for compatibility.
 
 ## Architecture that matters
 
 - Request flow is layered: `router -> controller -> service -> model`.
 - Relay/provider adapters live under `relay/channel/*`; the adaptor factory is in `relay/relay_adaptor.go`.
-- `main.go` embeds `web/default/dist` and `web/classic/dist` into the Go binary with `//go:embed`.
-- `router/main.go` wires five groups: API, dashboard, relay, video, and web routes.
+- The backend no longer serves embedded frontend assets; `web/default` and `web/classic` are built and deployed independently.
+- `router/main.go` wires API, dashboard, relay, and video route groups for the backend service.
+- Production deployment is split: backend container + independently hosted frontend, with `aiplat-postgresql` as the standard database service in Compose-based setups.
 - `constant/` is dependency-isolated: it may use stdlib only, must not import project packages, and must not contain business logic.
 
 ## Commands agents should use
@@ -42,15 +43,18 @@
 
 ### Local full-stack dev
 
-- Backend services via Docker: `docker compose -f docker-compose.dev.yml up -d`
-- Default frontend runs separately on Rsbuild dev server; it proxies `/api`, `/mj`, and `/pg` to `http://localhost:3000`.
+- Development uses three separate pieces: local backend, local frontend, and external PostgreSQL.
+- Start development PostgreSQL: `docker compose -f docker-compose.dev.yml up -d`
+- Run the backend locally against that external PostgreSQL via `SQL_DSN` in `.env` or process env.
+- Default frontend runs separately on Rsbuild dev server; configure `VITE_API_BASE_URL` when needed, or use the local proxy for `/api`, `/mj`, and `/pg` to `http://localhost:3000`.
 - Handy shortcut targets in `makefile`: `dev-api`, `dev-web`, `dev-web-classic`, `reset-setup`.
 
 ## Build and verification order
 
 - If you change Go code only: run `go test ./...` for the affected scope at minimum.
 - If you change `web/default`: run `bun run typecheck` and `bun run lint`; use `bun run build:check` when build-sensitive.
-- If you build the Go binary for shipping, build both frontends first. `main.go` embeds `web/default/dist` and `web/classic/dist`; missing `dist` output breaks the backend build.
+- Backend builds are independent from frontend builds now; you do not need frontend `dist` output to build or ship the Go backend binary.
+- When preparing a separated deployment release, verify backend and frontend artifacts independently.
 - CI does not run Go tests for you. Do not assume backend changes are verified unless you ran `go test ./...` yourself.
 
 ## Non-obvious project rules
@@ -96,9 +100,9 @@
 ## Environment and runtime quirks
 
 - Backend loads `.env` if present, then falls back gracefully to process env; see `.env.example` for supported variables.
-- Frontend env loading uses `VITE_` prefixes.
+- Frontend env loading uses `VITE_` prefixes; `VITE_API_BASE_URL` is required when the frontend is hosted separately from the backend origin.
 - `GIN_MODE=debug` is the switch for Gin debug mode.
-- `FRONTEND_BASE_URL` can make the backend redirect web traffic to an external frontend instead of serving embedded assets.
+- `FRONTEND_BASE_URL` is a legacy compatibility setting and should not be treated as the standard separated-deployment frontend configuration path.
 
 ## Protected project information
 

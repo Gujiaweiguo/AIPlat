@@ -114,12 +114,14 @@
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# Modifier la configuration docker-compose.yml
+# Modifier la configuration du service backend
 nano docker-compose.yml
 
-# Démarrer le service
+# Démarrer le backend + PostgreSQL
 docker-compose up -d
 ```
+
+> **Déploiement frontend :** déployez `web/default` séparément comme frontend principal et connectez-le à cette API backend. `web/classic` est désormais legacy et ne doit plus servir de défaut en production.
 
 <details>
 <summary><strong>Utilisation des commandes Docker</strong></summary>
@@ -150,7 +152,7 @@ docker run --name new-api -d --restart always \
 
 ---
 
-🎉 Après le déploiement, visitez `http://localhost:3000` pour commencer à utiliser!
+🎉 Après le déploiement, utilisez l'API backend sur `http://localhost:3000` et ouvrez votre frontend `web/default` déployé séparément.
 
 > [!WARNING]
 > Lorsque vous exploitez ce projet en tant que service public d'IA générative ou service de revente d'API, les utilisateurs doivent d'abord remplir toutes les obligations requises en matière d'enregistrement, de licence, de sécurité du contenu, de vérification d'identité, de conservation des journaux, de fiscalité, de paiement et d'autorisation en amont.
@@ -301,8 +303,9 @@ docker run --name new-api -d --restart always \
 
 | Composant | Exigence |
 |------|------|
-| **Base de données locale** | SQLite (Docker doit monter le répertoire `/data`)|
-| **Base de données distante | MySQL ≥ 5.7.8 ou PostgreSQL ≥ 9.6 |
+| **Frontend principal** | Déployer `web/default` séparément |
+| **Frontend legacy** | `web/classic` est réservé à la compatibilité |
+| **Base de données** | PostgreSQL ≥ 9.6 recommandé, MySQL ≥ 5.7.8 pris en charge |
 | **Moteur de conteneur** | Docker / Docker Compose |
 
 ### ⚙️ Configuration des variables d'environnement
@@ -314,8 +317,9 @@ docker run --name new-api -d --restart always \
 |--------|------|--------|
 | `SESSION_SECRET` | Secret de session (requis pour le déploiement multi-machines) |
 | `CRYPTO_SECRET` | Secret de chiffrement (requis pour Redis) | - |
-| `SQL_DSN` | Chaine de connexion à la base de données | - |
+| `SQL_DSN` | Chaine de connexion à la base de données (PostgreSQL recommandé) | - |
 | `REDIS_CONN_STRING` | Chaine de connexion Redis | - |
+| `VITE_API_BASE_URL` | Variable frontend pour l'application `web/default` déployée séparément | - |
 | `STREAMING_TIMEOUT` | Délai d'expiration du streaming (secondes) | `300` |
 | `STREAM_SCANNER_MAX_BUFFER_MB` | Taille max du buffer par ligne (Mo) pour le scanner SSE ; à augmenter quand les sorties image/base64 sont très volumineuses (ex. images 4K) | `64` |
 | `MAX_REQUEST_BODY_MB` | Taille maximale du corps de requête (Mo, comptée **après décompression** ; évite les requêtes énormes/zip bombs qui saturent la mémoire). Dépassement ⇒ `413` | `32` |
@@ -343,10 +347,10 @@ docker run --name new-api -d --restart always \
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# Modifier la configuration
+# Modifier la configuration backend
 nano docker-compose.yml
 
-# Démarrer le service
+# Démarrer la stack backend
 docker-compose up -d
 ```
 

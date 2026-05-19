@@ -114,12 +114,14 @@
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# 編輯 docker-compose.yml 配置
+# 編輯後端服務配置
 nano docker-compose.yml
 
-# 啟動服務
+# 啟動後端 + PostgreSQL
 docker-compose up -d
 ```
+
+> **前端部署說明：** `web/default` 現在是預設且唯一的主前端，請單獨部署並連接目前的後端 API。`web/classic` 已標記為 legacy，不應作為新的正式環境預設方案。
 
 <details>
 <summary><strong>使用 Docker 命令</strong></summary>
@@ -150,7 +152,7 @@ docker run --name new-api -d --restart always \
 
 ---
 
-🎉 部署完成後，訪問 `http://localhost:3000` 即可使用！
+🎉 部署完成後，可透過 `http://localhost:3000` 存取後端 API，並使用單獨部署的 `web/default` 前端。
 
 > [!WARNING]
 > 將本專案作為面向公眾的生成式 AI 服務或 API 轉售服務運營時，使用者應先完成備案、內容安全、實名、日誌留存、稅務、支付和上游授權等合規義務。
@@ -301,8 +303,9 @@ docker run --name new-api -d --restart always \
 
 | 組件 | 要求 |
 |------|------|
-| **本地資料庫** | SQLite（Docker 需掛載 `/data` 目錄）|
-| **遠端資料庫** | MySQL ≥ 5.7.8 或 PostgreSQL ≥ 9.6 |
+| **主前端** | 單獨部署 `web/default` |
+| **Legacy 前端** | `web/classic` 僅保留相容用途 |
+| **資料庫** | 建議 PostgreSQL ≥ 9.6，支援 MySQL ≥ 5.7.8 |
 | **容器引擎** | Docker / Docker Compose |
 
 ### ⚙️ 環境變數配置
@@ -314,8 +317,9 @@ docker run --name new-api -d --restart always \
 |--------|--------------------------------------------------------------|--------|
 | `SESSION_SECRET` | 會話密鑰（多機部署必須）                                                 | - |
 | `CRYPTO_SECRET` | 加密密鑰（Redis 必須）                                               | - |
-| `SQL_DSN` | 資料庫連接字符串                                                     | - |
+| `SQL_DSN` | 資料庫連接字符串（建議 PostgreSQL）                                      | - |
 | `REDIS_CONN_STRING` | Redis 連接字符串                                                  | - |
+| `VITE_API_BASE_URL` | 單獨部署的 `web/default` 前端用於連接後端 API 的環境變數 | - |
 | `STREAMING_TIMEOUT` | 流式超時時間（秒）                                                    | `300` |
 | `STREAM_SCANNER_MAX_BUFFER_MB` | 流式掃描器單行最大緩衝（MB），圖像生成等超大 `data:` 片段（如 4K 圖片 base64）需適當調大 | `64` |
 | `MAX_REQUEST_BODY_MB` | 請求體最大大小（MB，**解壓縮後**計；防止超大請求/zip bomb 導致記憶體暴漲），超過將返回 `413` | `32` |
@@ -343,10 +347,10 @@ docker run --name new-api -d --restart always \
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# 編輯配置
+# 編輯後端配置
 nano docker-compose.yml
 
-# 啟動服務
+# 啟動後端服務棧
 docker-compose up -d
 ```
 

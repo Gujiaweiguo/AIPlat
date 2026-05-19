@@ -114,12 +114,14 @@
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# Edit docker-compose.yml configuration
+# Edit backend service configuration
 nano docker-compose.yml
 
-# Start the service
+# Start backend + PostgreSQL
 docker-compose up -d
 ```
+
+> **Frontend deployment:** Deploy `web/default` separately as the primary frontend and point it to this backend API. `web/classic` is now legacy and should not be used for new production defaults.
 
 <details>
 <summary><strong>Using Docker Commands</strong></summary>
@@ -150,7 +152,7 @@ docker run --name new-api -d --restart always \
 
 ---
 
-🎉 After deployment is complete, visit `http://localhost:3000` to start using!
+🎉 After deployment is complete, access the backend API at `http://localhost:3000` and open your separately deployed `web/default` frontend.
 
 > [!WARNING]
 > When operating this project as a public generative AI service or API resale service, users should first complete all required filing, licensing, content safety, real-name verification, log retention, tax, payment, and upstream authorization obligations.
@@ -301,8 +303,9 @@ docker run --name new-api -d --restart always \
 
 | Component | Requirement |
 |------|------|
-| **Local database** | SQLite (Docker must mount `/data` directory)|
-| **Remote database** | MySQL ≥ 5.7.8 or PostgreSQL ≥ 9.6 |
+| **Primary frontend** | Deploy `web/default` separately |
+| **Legacy frontend** | `web/classic` is legacy-only |
+| **Database** | PostgreSQL ≥ 9.6 recommended, MySQL ≥ 5.7.8 supported |
 | **Container engine** | Docker / Docker Compose |
 
 ### ⚙️ Environment Variable Configuration
@@ -314,8 +317,9 @@ docker run --name new-api -d --restart always \
 |--------|------|--------|
 | `SESSION_SECRET` | Session secret (required for multi-machine deployment) | - |
 | `CRYPTO_SECRET` | Encryption secret (required for Redis) | - |
-| `SQL_DSN` | Database connection string | - |
+| `SQL_DSN` | Database connection string (PostgreSQL recommended) | - |
 | `REDIS_CONN_STRING` | Redis connection string | - |
+| `VITE_API_BASE_URL` | Frontend env var for the separately deployed `web/default` app | - |
 | `STREAMING_TIMEOUT` | Streaming timeout (seconds) | `300` |
 | `STREAM_SCANNER_MAX_BUFFER_MB` | Max per-line buffer (MB) for the stream scanner; increase when upstream sends huge image/base64 payloads | `64` |
 | `MAX_REQUEST_BODY_MB` | Max request body size (MB, counted **after decompression**; prevents huge requests/zip bombs from exhausting memory). Exceeding it returns `413` | `32` |
@@ -343,10 +347,10 @@ docker run --name new-api -d --restart always \
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# Edit configuration
+# Edit backend configuration
 nano docker-compose.yml
 
-# Start service
+# Start backend stack
 docker-compose up -d
 ```
 

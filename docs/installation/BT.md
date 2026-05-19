@@ -1,6 +1,6 @@
 # 宝塔面板部署教程
 
-本文档提供使用宝塔面板 Docker 功能部署 New API 的图文教程。
+本文档提供使用宝塔面板 Docker 功能部署 New API 后端的图文教程。`web/default` 需要单独部署，`web/classic` 为 legacy 前端，不再作为新的默认部署目标。
 
 > 📖 官方文档：[宝塔面板部署](https://docs.newapi.pro/zh/docs/installation/deployment-methods/bt-docker-installation)
 
@@ -40,13 +40,13 @@
 2. 搜索并找到 **New-API**
 3. 点击 **安装**
 4. 配置以下基本选项：
-   - **容器名称**：可自定义，默认为 `new-api`
+   - **容器名称**：可自定义，推荐使用 `aiplat-app`
    - **端口映射**：默认为 `3000:3000`
    - **环境变量**：
      - `SESSION_SECRET`：会话密钥（**必填**，多机部署时必须一致）
      - `CRYPTO_SECRET`：加密密钥（使用 Redis 时必填）
 5. 点击 **确认** 开始安装
-6. 等待安装完成后，访问 `http://您的服务器IP:3000` 即可使用
+6. 等待安装完成后，通过 `http://您的服务器IP:3000` 访问后端 API，再访问单独部署的 `web/default` 前端
 
 ### 方法二：使用 Docker Compose
 
@@ -56,9 +56,9 @@
 ```yaml
 version: '3'
 services:
-  new-api:
+  aiplat-app:
     image: calciumion/new-api:latest
-    container_name: new-api
+    container_name: aiplat-app
     restart: always
     ports:
       - "3000:3000"
@@ -148,4 +148,3 @@ docker-compose down && docker-compose up -d
 ![宝塔面板 Docker 安装](https://github.com/user-attachments/assets/7a6fc03e-c457-45e4-b8f9-184508fc26b0)
 
 > ⚠️ 注意：密钥为环境变量 `SESSION_SECRET`，请务必设置！
-

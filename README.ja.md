@@ -114,12 +114,14 @@
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# docker-compose.yml 設定を編集
+# バックエンドサービス設定を編集
 nano docker-compose.yml
 
-# サービスを起動
+# バックエンド + PostgreSQL を起動
 docker-compose up -d
 ```
+
+> **フロントエンド配備:** `web/default` を主フロントエンドとして別途デプロイし、このバックエンド API に接続してください。`web/classic` は legacy 扱いとなり、新しい本番デフォルトには使用しません。
 
 <details>
 <summary><strong>Dockerコマンドを使用</strong></summary>
@@ -150,7 +152,7 @@ docker run --name new-api -d --restart always \
 
 ---
 
-🎉 デプロイが完了したら、`http://localhost:3000` にアクセスして使用を開始してください！
+🎉 デプロイ完了後は `http://localhost:3000` でバックエンド API を利用し、別途デプロイした `web/default` フロントエンドを開いてください。
 
 > [!WARNING]
 > 本プロジェクトを公衆向け生成 AI サービスまたは API 再販サービスとして運営する場合、ユーザーは届出、コンテンツセキュリティ、本人確認、ログ保持、税務、決済、上流認可などの必要なコンプライアンス義務を先に完了してください。
@@ -303,8 +305,9 @@ docker run --name new-api -d --restart always \
 
 | コンポーネント | 要件 |
 |------|------|
-| **ローカルデータベース** | SQLite（Dockerは `/data` ディレクトリをマウントする必要があります）|
-| **リモートデータベース** | MySQL ≥ 5.7.8 または PostgreSQL ≥ 9.6 |
+| **主フロントエンド** | `web/default` を別途デプロイ |
+| **Legacy フロントエンド** | `web/classic` は互換用途のみ |
+| **データベース** | PostgreSQL ≥ 9.6 推奨、MySQL ≥ 5.7.8 も対応 |
 | **コンテナエンジン** | Docker / Docker Compose |
 
 ### ⚙️ 環境変数設定
@@ -316,8 +319,9 @@ docker run --name new-api -d --restart always \
 |--------|------|--------|
 | `SESSION_SECRET` | セッションシークレット（マルチマシンデプロイに必須） | - |
 | `CRYPTO_SECRET` | 暗号化シークレット（Redisに必須） | - |
-| `SQL_DSN** | データベース接続文字列 | - |
+| `SQL_DSN** | データベース接続文字列（PostgreSQL 推奨） | - |
 | `REDIS_CONN_STRING` | Redis接続文字列 | - |
+| `VITE_API_BASE_URL` | 別途デプロイした `web/default` がバックエンド API に接続するための環境変数 | - |
 | `STREAMING_TIMEOUT` | ストリーミング応答のタイムアウト時間（秒） | `300` |
 | `STREAM_SCANNER_MAX_BUFFER_MB` | ストリームスキャナの1行あたりバッファ上限（MB）。4K画像など巨大なbase64 `data:` ペイロードを扱う場合は値を増加させてください | `64` |
 | `MAX_REQUEST_BODY_MB` | リクエストボディ最大サイズ（MB、**解凍後**に計測。巨大リクエスト/zip bomb によるメモリ枯渇を防止）。超過時は `413` | `32` |
@@ -345,10 +349,10 @@ docker run --name new-api -d --restart always \
 git clone https://github.com/QuantumNous/new-api.git
 cd new-api
 
-# 設定を編集
+# バックエンド設定を編集
 nano docker-compose.yml
 
-# サービスを起動
+# バックエンドスタックを起動
 docker-compose up -d
 ```
 

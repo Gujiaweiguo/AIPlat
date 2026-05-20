@@ -43,12 +43,13 @@ const CONTENT_SECTIONS = [
     titleKey: 'Data Dashboard',
     descriptionKey: 'Configure data export settings for dashboard',
     build: (settings: ContentSettings) => (
-      <DashboardSection
-        defaultValues={{
-          DataExportEnabled: settings.DataExportEnabled,
-          DataExportInterval: settings.DataExportInterval,
-          DataExportDefaultTime: validateDataExportDefaultTime(
-            settings.DataExportDefaultTime
+        <DashboardSection
+          defaultValues={{
+            ApiConfigEnabled: settings['console_setting.api_config_enabled'],
+            DataExportEnabled: settings.DataExportEnabled,
+            DataExportInterval: settings.DataExportInterval,
+            DataExportDefaultTime: validateDataExportDefaultTime(
+              settings.DataExportDefaultTime
           ),
         }}
       />

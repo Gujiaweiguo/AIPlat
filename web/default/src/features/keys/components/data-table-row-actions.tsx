@@ -24,7 +24,6 @@ import {
   Power,
   PowerOff,
   ExternalLink,
-  ArrowRightLeft,
   Copy,
   Link,
   Loader2,
@@ -53,6 +52,7 @@ import {
 import { useChatPresets } from '@/features/chat/hooks/use-chat-presets'
 import { resolveChatUrl, type ChatPreset } from '@/features/chat/lib/chat-links'
 import { sendToFluent } from '@/features/chat/lib/send-to-fluent'
+import { useStatus } from '@/hooks/use-status'
 import { updateApiKeyStatus } from '../api'
 import { API_KEY_STATUS, ERROR_MESSAGES, SUCCESS_MESSAGES } from '../constants'
 import { apiKeySchema } from '../types'
@@ -91,11 +91,13 @@ export function DataTableRowActions<TData>({
   const {
     setOpen,
     setCurrentRow,
-    triggerRefresh,
     setResolvedKey,
+    triggerRefresh,
     resolveRealKey,
   } = useApiKeys()
+  const { status } = useStatus()
   const isEnabled = apiKey.status === API_KEY_STATUS.ENABLED
+  const isApiConfigEnabled = status?.api_config_enabled !== false
   const { chatPresets, serverAddress } = useChatPresets()
   const [isTogglingStatus, setIsTogglingStatus] = useState(false)
 
@@ -227,6 +229,22 @@ export function DataTableRowActions<TData>({
               <Copy size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
+          {isApiConfigEnabled && (
+            <DropdownMenuItem
+              onClick={async () => {
+                const realKey = await resolveRealKey(apiKey.id)
+                if (!realKey) return
+                setResolvedKey(realKey)
+                setCurrentRow(apiKey)
+                setOpen('api-config')
+              }}
+            >
+              {t('API Config')}
+              <DropdownMenuShortcut>
+                <ExternalLink size={16} />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={async () => {
               const realKey = await resolveRealKey(apiKey.id)
@@ -256,20 +274,7 @@ export function DataTableRowActions<TData>({
               <Edit size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={async () => {
-              const realKey = await resolveRealKey(apiKey.id)
-              if (!realKey) return
-              setResolvedKey(realKey)
-              setCurrentRow(apiKey)
-              setOpen('cc-switch')
-            }}
-          >
-            {t('CC Switch')}
-            <DropdownMenuShortcut>
-              <ArrowRightLeft size={16} />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
+
           {hasChatPresets && (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>{t('Chat')}</DropdownMenuSubTrigger>

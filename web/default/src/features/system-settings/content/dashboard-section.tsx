@@ -45,6 +45,7 @@ import { SettingsSection } from '../components/settings-section'
 import { useUpdateOption } from '../hooks/use-update-option'
 
 const dataDashboardSchema = z.object({
+  ApiConfigEnabled: z.boolean(),
   DataExportEnabled: z.boolean(),
   DataExportInterval: z.number().int().min(1).max(1440),
   DataExportDefaultTime: z.enum(['hour', 'day', 'week']),
@@ -54,6 +55,13 @@ type DataDashboardFormValues = z.infer<typeof dataDashboardSchema>
 
 type DashboardSectionProps = {
   defaultValues: DataDashboardFormValues
+}
+
+const DASHBOARD_OPTION_KEYS: Record<keyof DataDashboardFormValues, string> = {
+  ApiConfigEnabled: 'console_setting.api_config_enabled',
+  DataExportEnabled: 'DataExportEnabled',
+  DataExportInterval: 'DataExportInterval',
+  DataExportDefaultTime: 'DataExportDefaultTime',
 }
 
 const granularityOptions = [
@@ -82,7 +90,10 @@ export function DashboardSection({ defaultValues }: DashboardSectionProps) {
     )
 
     for (const [key, value] of updates) {
-      await updateOption.mutateAsync({ key, value })
+      await updateOption.mutateAsync({
+        key: DASHBOARD_OPTION_KEYS[key as keyof DataDashboardFormValues],
+        value,
+      })
     }
   }
 
@@ -95,6 +106,29 @@ export function DashboardSection({ defaultValues }: DashboardSectionProps) {
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          <FormField
+            control={form.control}
+            name='ApiConfigEnabled'
+            render={({ field }) => (
+              <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
+                <div className='space-y-0.5'>
+                  <FormLabel className='text-base'>
+                    {t('Enable API Config')}
+                  </FormLabel>
+                  <FormDescription>
+                    {t('Show API configuration guide in key actions menu')}
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name='DataExportEnabled'

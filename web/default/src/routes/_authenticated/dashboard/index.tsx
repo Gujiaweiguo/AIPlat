@@ -18,15 +18,14 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth-store'
-import { ROLE } from '@/lib/roles'
 import { DASHBOARD_DEFAULT_SECTION } from '@/features/dashboard/section-registry'
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
   beforeLoad: () => {
     const { auth } = useAuthStore.getState()
     const userRole = auth.user?.role ?? 0
-    const isAdmin = userRole >= ROLE.ADMIN
-    const defaultSection = isAdmin ? DASHBOARD_DEFAULT_SECTION : 'models'
+    void userRole
+    const defaultSection = DASHBOARD_DEFAULT_SECTION
     throw redirect({
       to: '/dashboard/$section',
       params: { section: defaultSection },

@@ -25,6 +25,7 @@ import {
   Flame,
   TrendingUp,
   Activity,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -78,6 +79,13 @@ export function useModelStatCardsConfig(): StatCardConfig[] {
       icon: Zap,
       getValue: (stat, timeRangeMinutes = 1) =>
         safeDivide(stat?.tpm ?? 0, timeRangeMinutes),
+    },
+    {
+      key: 'balance',
+      title: t('Credit remaining'),
+      description: t('Account balance'),
+      icon: Wallet,
+      getValue: (stat) => stat?.balance ?? 0,
     },
   ]
 }

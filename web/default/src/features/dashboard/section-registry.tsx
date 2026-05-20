@@ -27,7 +27,6 @@ const DASHBOARD_SECTIONS = [
     id: 'overview',
     titleKey: 'Overview',
     descriptionKey: 'View dashboard overview and statistics',
-    adminOnly: true,
     build: () => null,
   },
   {
@@ -47,7 +46,7 @@ const DASHBOARD_SECTIONS = [
 
 export type DashboardSectionId = (typeof DASHBOARD_SECTIONS)[number]['id']
 
-const ADMIN_ONLY_SECTIONS = new Set<string>(['overview', 'users'])
+const ADMIN_ONLY_SECTIONS = new Set<string>(['users'])
 
 const dashboardRegistry = createSectionRegistry<
   DashboardSectionId,

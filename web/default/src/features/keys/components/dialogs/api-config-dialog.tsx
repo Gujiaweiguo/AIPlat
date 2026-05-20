@@ -20,6 +20,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Copy, Info } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { getUserModels } from '@/lib/api'
+import { copyToClipboard } from '@/lib/copy-to-clipboard'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -28,8 +30,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getUserModels } from '@/lib/api'
-import { copyToClipboard } from '@/lib/copy-to-clipboard'
 
 function getServerAddress(): string {
   try {
@@ -92,7 +92,7 @@ export function ApiConfigDialog(props: Props) {
           </div>
 
           <div className='space-y-1.5'>
-            <label className='text-muted-foreground text-xs font-medium uppercase tracking-wider'>
+            <label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
               {t('API Address')}
             </label>
             <div className='flex items-center gap-2'>
@@ -110,7 +110,7 @@ export function ApiConfigDialog(props: Props) {
           </div>
 
           <div className='space-y-1.5'>
-            <label className='text-muted-foreground text-xs font-medium uppercase tracking-wider'>
+            <label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
               {t('API Key')}
             </label>
             <div className='flex items-center gap-2'>
@@ -128,7 +128,7 @@ export function ApiConfigDialog(props: Props) {
           </div>
 
           <div className='space-y-1.5'>
-            <label className='text-muted-foreground text-xs font-medium uppercase tracking-wider'>
+            <label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
               {t('Available Models')}
             </label>
             <div className='bg-muted max-h-48 space-y-1 overflow-y-auto rounded p-2'>
@@ -145,7 +145,7 @@ export function ApiConfigDialog(props: Props) {
               ) : (
                 models.map((model) => (
                   <div key={model} className='flex items-center gap-2'>
-                    <code className='flex-1 truncate rounded bg-background px-2 py-1.5 font-mono text-sm'>
+                    <code className='bg-background flex-1 truncate rounded px-2 py-1.5 font-mono text-sm'>
                       {model}
                     </code>
                     <Button

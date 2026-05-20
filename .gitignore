@@ -41,3 +41,9 @@ skills-lock.json
 
 # Screenshots
 *.png
+
+# OpenSpec local data
+openspec/
+
+# i18n sync reports
+web/default/src/i18n/locales/_reports/

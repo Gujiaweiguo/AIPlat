@@ -16,10 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { useQuery } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
-import { getUserGroups } from '@/lib/api'
+
 import { formatQuota, formatTimestampToDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -47,29 +46,8 @@ function getQuotaProgressColor(percentage: number): string {
   return '[&_[data-slot=progress-indicator]]:bg-emerald-500'
 }
 
-function useGroupRatios(): Record<string, number> {
-  const { data } = useQuery({
-    queryKey: ['user-self-groups'],
-    queryFn: getUserGroups,
-    staleTime: 5 * 60 * 1000,
-    select: (res) => {
-      if (!res.success || !res.data) return {}
-      const ratios: Record<string, number> = {}
-      for (const [group, info] of Object.entries(res.data)) {
-        if (typeof info.ratio === 'number') {
-          ratios[group] = info.ratio
-        }
-      }
-      return ratios
-    },
-  })
-
-  return data ?? {}
-}
-
 export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
   const { t } = useTranslation()
-  const groupRatios = useGroupRatios()
   return [
     {
       id: 'select',
@@ -200,7 +178,6 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
       cell: ({ row }) => {
         const apiKey = row.original
         const group = row.getValue('group') as string
-        const ratio = group && group !== 'auto' ? groupRatios[group] : undefined
 
         if (group === 'auto') {
           return (
@@ -230,7 +207,7 @@ export function useApiKeysColumns(): ColumnDef<ApiKey>[] {
             </Tooltip>
           )
         }
-        return <GroupBadge group={group} ratio={ratio} />
+        return <GroupBadge group={group} />
       },
       meta: { label: t('Group'), mobileHidden: true },
     },
